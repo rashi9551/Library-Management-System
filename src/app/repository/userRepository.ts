@@ -1,0 +1,27 @@
+import UserModel from "../../entities/user";
+import { UserData, UserInterface } from "../../interfaces/interface";
+import { IUserRepo } from "../../interfaces/IUserRepo";
+import { hashPassword } from "../../utils/passwordHashing";
+
+export default class UserRepository implements IUserRepo{
+    findUser = async (email: string): Promise<UserData | null> => {
+        try {
+            const user = await UserModel.findOne({ email }).exec();
+            return user as UserData | null;
+        } catch (error) {
+            console.error("Error finding user:", error);
+            return null;
+        }
+    }
+    saveUser = async (data: UserInterface): Promise<UserData | null> => {
+        try {
+            console.log(data,"ithu pass");
+            const user = new UserModel(data);
+            const savedUser = await user.save() as UserData
+            return savedUser;
+        } catch (error) {
+            console.error("Error finding user:", error);
+            return null;
+        }
+    }
+}
