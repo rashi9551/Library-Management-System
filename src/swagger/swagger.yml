@@ -1,0 +1,181 @@
+openapi: 3.0.0
+info:
+  title: Library & Auth API
+  version: 1.0.0
+  description: API for user authentication and book management
+
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                email:
+                  type: string
+                  example: john@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: User registered successfully
+        '409':
+          description: User already exists
+        '500':
+          description: Internal server error
+
+  /api/auth/login:
+    post:
+      summary: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: john@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Invalid credentials
+        '500':
+          description: Internal server error
+
+  /api/books:
+    post:
+      summary: Create a new book
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - author
+                - isbn
+              properties:
+                title:
+                  type: string
+                  example: The Great Gatsby
+                author:
+                  type: string
+                  example: F. Scott Fitzgerald
+                isbn:
+                  type: string
+                  example: 978-3-16-148410-0
+      responses:
+        '200':
+          description: Book created successfully
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    get:
+      summary: Get all books
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: 64fa5b9f1c4e1a00123abcde
+                    title:
+                      type: string
+                      example: The Great Gatsby
+                    author:
+                      type: string
+                      example: F. Scott Fitzgerald
+                    isbn:
+                      type: string
+                      example: 978-3-16-148410-0
+        '401':
+          description: Unauthorized
+
+  /api/books/{id}/checkout:
+    post:
+      summary: Checkout a book by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Book ID to checkout
+      responses:
+        '200':
+          description: Book checked out successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Book not found
+        '500':
+          description: Internal server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
